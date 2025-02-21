@@ -4,65 +4,87 @@ const sections = document.querySelectorAll('section');
 const menuIcon = document.querySelector('#menu-icon');
 const navbar   = document.querySelector('header nav');
 
-
 menuIcon.addEventListener('click', () => {
     menuIcon.classList.toggle('bx-x');
     navbar.classList.toggle('active');
 })
 
-
+// Initialize the first section as active
+window.addEventListener('DOMContentLoaded', () => {
+    sections[0].classList.add('active');
+    navLinks[0].classList.add('active');
+    document.querySelector('header').classList.add('active');
+});
 
 const activePage = () => {
     const header = document.querySelector('header');
-    const barsBox = document.querySelector('.bars-box');
 
-    header.classList.remove('active');
-    setTimeout(() => {
-        header.classList.add('active');
-    },1100);
-
-
+    // Update navigation state
     navLinks.forEach(link => {
         link.classList.remove('active');
-    });
-
-    barsBox.classList.remove('active');
-    setTimeout(() => {
-        barsBox.classList.add('active');
-    },1100);
-    sections.forEach(section => {
-        section.classList.remove('active');
     });
 
     menuIcon.classList.remove('bx-x');
     navbar.classList.remove('active');
 }
 
-navLinks.forEach((link, idx) => {
-    link.addEventListener('click', () => {
-        if (!link.classList.contains('active')) {  // Fixed syntax error
+// Handle section visibility on scroll
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.3
+};
+
+const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            // Update navigation
+            const sectionId = entry.target.getAttribute('id');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+    });
+}, observerOptions);
+
+// Observe all sections
+sections.forEach(section => {
+    sectionObserver.observe(section);
+});
+
+navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        
+        if (targetSection) {
             activePage();
             link.classList.add('active');
-
-            setTimeout(() => {
-                sections[idx].classList.add('active');
-            }, 1100);
+            
+            window.scrollTo({
+                top: targetSection.offsetTop - 80,
+                behavior: 'smooth'
+            });
         }
     });
 });
 
-logoLink.addEventListener('click', () => {
-    if (!navLinks[0].classList.contains('active')){
-    activePage();  // Clears all active classes
-    navLinks[0].classList.add('active');  // Sets the first link as active
-
-    setTimeout(() => {
-        sections[0].classList.add('active');
-    }, 1100);
-
-    }
+logoLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    activePage();
+    navLinks[0].classList.add('active');
+    
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
 });
-
 
 const resumeBtns = document.querySelectorAll('.resume-btn');
 
